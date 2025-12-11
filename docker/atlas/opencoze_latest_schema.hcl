@@ -1016,6 +1016,12 @@ table "conversation" {
     comment        = "id"
     auto_increment = true
   }
+  column "name" {
+    null    = true
+    type    = varchar(255)
+    default = ""
+    comment = "conversation name"
+  }
   column "connector_id" {
     null     = false
     type     = bigint
@@ -1073,12 +1079,6 @@ table "conversation" {
     default  = 0
     unsigned = true
     comment  = "Update Time in Milliseconds"
-  }
-  column "name" {
-    null    = true
-    type    = varchar(255)
-    default = ""
-    comment = "conversation name"
   }
   column "user_id" {
     null    = false
@@ -3262,11 +3262,6 @@ table "single_agent_draft" {
     type    = json
     comment = "Agent Database Base Configuration"
   }
-  column "shortcut_command" {
-    null    = true
-    type    = json
-    comment = "shortcut command"
-  }
   column "bot_mode" {
     null    = false
     type    = tinyint
@@ -3277,6 +3272,11 @@ table "single_agent_draft" {
     null    = true
     type    = text
     comment = "chatflow layout info"
+  }
+  column "shortcut_command" {
+    null    = true
+    type    = json
+    comment = "shortcut command"
   }
   primary_key {
     columns = [column.id]
@@ -3434,6 +3434,17 @@ table "single_agent_version" {
     unsigned = true
     comment  = "Create Time in Milliseconds"
   }
+  column "bot_mode" {
+    null    = false
+    type    = tinyint
+    default = 0
+    comment = "bot mode,0:single mode 2:chatflow mode"
+  }
+  column "layout_info" {
+    null    = true
+    type    = text
+    comment = "chatflow layout info"
+  }
   column "updated_at" {
     null     = false
     type     = bigint
@@ -3517,17 +3528,6 @@ table "single_agent_version" {
     null    = true
     type    = json
     comment = "shortcut command"
-  }
-  column "bot_mode" {
-    null    = false
-    type    = tinyint
-    default = 0
-    comment = "bot mode,0:single mode 2:chatflow mode"
-  }
-  column "layout_info" {
-    null    = true
-    type    = text
-    comment = "chatflow layout info"
   }
   primary_key {
     columns = [column.id]

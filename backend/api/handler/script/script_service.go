@@ -18,8 +18,6 @@ package scriptapi
 
 import (
 	"context"
-	"encoding/json"
-	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
@@ -212,48 +210,14 @@ func RunWorkflowInstance(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	run := &entity.WorkflowRun{
-		InstanceID:    instanceID,
-		Status:        ternaryNonEmpty(req.Status, "running"),
-		InputContext:  req.InputContext,
-		OutputContext: req.OutputContext,
-		StartedAt:     time.Now(),
-	}
-	if run.Status != "running" {
-		now := time.Now()
-		run.FinishedAt = &now
-	}
-
-	nodeOutputs := make([]*entity.NodeOutput, 0, len(req.NodeOutputs))
-	for _, output := range req.NodeOutputs {
-		node := &entity.NodeOutput{
-			RunID:      run.ID,
-			NodeID:     output.NodeID,
-			OutputData: output.OutputData,
-		}
-		if len(output.AssetIDs) > 0 {
-			encoded, err := json.Marshal(output.AssetIDs)
-			if err != nil {
-				respondWithError(c, consts.StatusBadRequest, err)
-				return
-			}
-			node.AssetIDs = encoded
-		}
-		nodeOutputs = append(nodeOutputs, node)
-	}
-
-	lastContext := req.LastContext
-	if len(lastContext) == 0 {
-		lastContext = req.OutputContext
-	}
-
-	if err := scriptapp.ScriptSVC.WorkflowRun.RunWorkflowInstance(ctx, run, nodeOutputs, lastContext); err != nil {
+	runID, err := scriptapp.ScriptSVC.WorkflowRun.ExecuteWorkflowInstance(ctx, instanceID, req.InputContext)
+	if err != nil {
 		respondWithError(c, consts.StatusInternalServerError, err)
 		return
 	}
 
 	c.JSON(consts.StatusOK, &scriptmodel.RunWorkflowInstanceResponse{
-		RunID: run.ID,
+		RunID: runID,
 	})
 }
 
@@ -276,42 +240,34 @@ func RunNodeInInstance(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	run := &entity.WorkflowRun{
-		InstanceID:    instanceID,
-		Status:        ternaryNonEmpty(req.Status, "running"),
-		InputContext:  nil,
-		OutputContext: req.OutputData,
-		StartedAt:     time.Now(),
-	}
-	if run.Status != "running" {
-		now := time.Now()
-		run.FinishedAt = &now
+	inputCtx := req.InputContext
+	if len(inputCtx) == 0 {
+		inputCtx = req.LastContext
 	}
 
-	output := &entity.NodeOutput{
-		NodeID:     nodeID,
-		OutputData: req.OutputData,
-	}
-	if len(req.AssetIDs) > 0 {
-		encoded, err := json.Marshal(req.AssetIDs)
-		if err != nil {
-			respondWithError(c, consts.StatusBadRequest, err)
-			return
-		}
-		output.AssetIDs = encoded
-	}
-
-	lastContext := req.LastContext
-	if len(lastContext) == 0 {
-		lastContext = req.OutputData
-	}
-
-	if err := scriptapp.ScriptSVC.WorkflowRun.RunNodeInInstance(ctx, run, output, lastContext); err != nil {
+	runID, err := scriptapp.ScriptSVC.WorkflowRun.ExecuteNodeInInstance(ctx, instanceID, nodeID, inputCtx)
+	if err != nil {
 		respondWithError(c, consts.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(consts.StatusOK, &scriptmodel.RunNodeResponse{RunID: run.ID})
+	c.JSON(consts.StatusOK, &scriptmodel.RunNodeResponse{RunID: runID})
+}
+
+func TextEdit(ctx context.Context, c *app.RequestContext) {
+	var req scriptmodel.TextEditRequest
+	if err := c.BindAndValidate(&req); err != nil {
+		respondWithError(c, consts.StatusBadRequest, err)
+		return
+	}
+
+	resp, err := scriptapp.ScriptSVC.Text.Edit(ctx, &req)
+	if err != nil {
+		respondWithError(c, consts.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(consts.StatusOK, resp)
 }
 
 func toScriptProjectVO(p *entity.ScriptProject) *scriptmodel.ScriptProjectVO {

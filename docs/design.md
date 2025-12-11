@@ -613,6 +613,12 @@ Asset
         * 路由示例：`POST /api/script/workflow-instances/:instanceId/run`
         * 字段：是否全量运行 / 指定起止节点等 options。
 
+**当前进展**
+
+- `RunWorkflowInstance` handler（`backend/api/handler/script/script_service.go`）不再直接写入请求中带来的节点输出，而是复用 `WorkflowRunService.ExecuteWorkflowInstance` 触发 workflow 域的 `SyncExecute` 并返回由服务生成的 run id。
+- `WorkflowRunService.ExecuteWorkflowInstance`（`backend/application/script/workflow_run.go`）读取 script workflow 实例，构建 `workflowModel.ExecuteConfig`、执行 `workflow.GetWorkflowDomainSVC().SyncExecute`、把返回的 `WorkflowExecution`/`NodeExecution` 转为 `WorkflowRun` + `NodeOutput`，同时更新 `WorkflowInstance.last_context`。
+- 目前还未在这个阶段自动创建对应的 Asset 记录、区分单节点运行（Step4 仍需借助 `workflow.AsyncExecuteNode`），但已有的 `WorkflowRun` 和 `NodeOutput` 记录为后续扩展奠定了基础。
+
 ---
 
 ## Step 4：单节点运行（RunNodeInInstance）
@@ -635,6 +641,12 @@ Asset
     * `RunNodeInInstanceHandler`：
 
         * 路由示例：`POST /api/script/workflow-instances/:instanceId/nodes/:nodeId/run`
+
+**当前进展**
+
+- 已经为 RunNodeInInstance Handler（`backend/api/handler/script/script_service.go`）增加输入上下文参数，优先使用 `input_context`，其次回退到 `last_context`；
+- 新增 `WorkflowRunService.ExecuteNodeInInstance`（`backend/application/script/workflow_run.go`），通过 `workflowModel.ExecuteModeNodeDebug` + `workflow.AsyncExecuteNode` 执行指定节点并从 `GetNodeExecution` 拉取结果，再将 `NodeExecution` 转为 `NodeOutput`、持久化 `WorkflowRun` 并更新 `WorkflowInstance.last_context`；
+- 当前还未根据节点输出自动生成 Asset（可后续在 `WorkflowRunService` 中根据节点类型产出），但已有的 `WorkflowRun`/`NodeOutput` 记录以及 `last_context` 更新实现了对单节点调试的基本支持。
 
 ---
 
@@ -662,6 +674,10 @@ Asset
         * 左侧暂时简单放几个文本框或占位组件（后续换成专业编辑器）。
         * 中间嵌入现有 workflow 画布组件，加载对应 workflow 定义。
         * 右侧用简单列表展示当前实例的资产（从 `ListAssetsByWorkflowInstance` 获取）。
+**当前进展**
+
+- 在 `/space/:space_id/develop` 页通过 `ScriptEntryCard`（`frontend/apps/coze-studio/src/components/script-entry-card.tsx`）提供了直接跳转 `Script Studio` 的入口，样式和配色与原始布局保持一致。
+- 在路由配置中增加 `/space/:space_id/script-projects` 与 `/space/:space_id/script-projects/:projectId/workflows/:instanceId` 页面，分别由 `ScriptProjectsPage`（`frontend/apps/coze-studio/src/pages/script-projects.tsx`）和 `ScriptWorkflowPage`（`frontend/apps/coze-studio/src/pages/script-workflow.tsx`）渲染，前者展示项目列表并支持输入实例 ID 跳转，后者展示项目信息、实例状态、运行历史与资产列表。
 
 ---
 
@@ -671,20 +687,24 @@ Asset
 
 **主要任务：**
 
-1. 在 `script-studio` 包中：
+- 1. 在 `script-studio` 包中：
 
     * 实现一个 `AssetPanel` 组件：
 
         * Tabs：文本 / 图片 / 视频 / 音频。
         * 每个 Tab 中展示对应类型的 Asset 卡片（缩略图、标题、时间、场景/镜头标签等）。
 
-2. 在 `/script-projects/:projectId/workflows/:instanceId` 页面中：
+- 2. 在 `/script-projects/:projectId/workflows/:instanceId` 页面中：
 
     * 引入 AssetPanel，并在初始化时：
 
         * 调用 `ListAssetsByWorkflowInstance`。
         * 使用 Zustand 或其他 store 存储 assets。
     * 提供刷新机制（当工作流运行完毕或者单节点运行完成后刷新资产列表）。
+**当前进展**
+
+- `/space/:space_id/script-projects/:projectId/workflows/:instanceId` 页面中的“资产面板”区域已经在 `ScriptWorkflowPage` 中实现，调用 `/api/script/assets` 并以卡片形式展示文本/图片/视频/音频，虽然还未集成 Zustand 但 UI 已可直接读取后端数据。
+- `WorkflowRunService.ExecuteWorkflowInstance` / `ExecuteNodeInInstance`（`backend/application/script/workflow_run.go`）在完成节点运行后会通过 `AssetService` 自动创建 `assets` 表记录，把节点输出当作文本资产写入数据库，同时附带 `node_type`/`node_name` 元信息，使 Step6 的资产面板可以直接展示实际运行生成的内容。
 
 ---
 
@@ -711,6 +731,11 @@ Asset
         * 弹出对话框，让用户选择编辑意图。
         * 调用 `text-edit` API。
         * 将返回的文本插入或替换选中的内容。
+
+**当前进展**
+
+- 后端在 `/api/script/text-edit`（`backend/api/handler/script/script_service.go`）中新增了请求处理逻辑，并通过 `TextEditService`（`backend/application/script/text_edit.go`）提供了简单的 AI 文本编辑模拟，同时将该服务注入 `ScriptApplicationService` 供未来扩展。
+- 前端的 Script Workflow 页面新增了 AI 编辑卡片（`frontend/apps/coze-studio/src/pages/script-workflow.tsx`），展示一个文本区域、编辑意图输入和“调用 AI 编辑”按钮，通过新 API 返回 `edited_text`/`diff` 并显示在 UI 中，实现 Step7 中“选中文本 -> AI 编辑”的基础交互。
 
 ---
 
@@ -751,4 +776,3 @@ Asset
 当主线功能跑通后，你可以考虑把世界观/人物/大纲/场景抽成更细的领域与表结构，以获得更高的可视化能力与复用度。不过这属于下一阶段演进。
 
 ---
-

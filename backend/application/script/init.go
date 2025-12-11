@@ -30,6 +30,7 @@ type ScriptApplicationService struct {
 	WorkflowInstance *WorkflowInstanceService
 	Asset            *AssetService
 	WorkflowRun      *WorkflowRunService
+	Text             *TextEditService
 }
 
 func InitService(db *gorm.DB, idGen idgen.IDGenerator) *ScriptApplicationService {
@@ -39,11 +40,13 @@ func InitService(db *gorm.DB, idGen idgen.IDGenerator) *ScriptApplicationService
 	runRepo := repository.NewWorkflowRunRepo(db, idGen)
 	nodeOutputRepo := repository.NewNodeOutputRepo(db, idGen)
 
+	assetSvc := &AssetService{repo: assetRepo}
 	svc := &ScriptApplicationService{
 		ScriptProject:    &ScriptProjectService{repo: projectRepo},
 		WorkflowInstance: &WorkflowInstanceService{repo: workflowRepo},
-		Asset:            &AssetService{repo: assetRepo},
-		WorkflowRun:      &WorkflowRunService{runRepo: runRepo, nodeOutputRepo: nodeOutputRepo, workflowInstanceRepo: workflowRepo},
+		Asset:            assetSvc,
+		WorkflowRun:      &WorkflowRunService{runRepo: runRepo, nodeOutputRepo: nodeOutputRepo, workflowInstanceRepo: workflowRepo, assetSvc: assetSvc},
+		Text:             &TextEditService{},
 	}
 	ScriptSVC = svc
 	return svc

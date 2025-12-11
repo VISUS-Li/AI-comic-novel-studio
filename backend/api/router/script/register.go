@@ -32,4 +32,5 @@ func Register(r *server.Hertz) {
 	scriptGroup.POST("/workflow-instances/:instanceId/run", scripthandler.RunWorkflowInstance)
 	scriptGroup.POST("/workflow-instances/:instanceId/nodes/:nodeId/run", scripthandler.RunNodeInInstance)
 	scriptGroup.GET("/assets", scripthandler.ListAssets)
+	scriptGroup.POST("/text-edit", scripthandler.TextEdit)
 }

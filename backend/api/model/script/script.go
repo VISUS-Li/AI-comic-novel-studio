@@ -137,12 +137,26 @@ type NodeOutputInfo struct {
 }
 
 type RunNodeRequest struct {
-	Status      string          `json:"status"`
-	OutputData  json.RawMessage `json:"output_data"`
-	LastContext json.RawMessage `json:"last_context"`
-	AssetIDs    []string        `json:"asset_ids"`
+	Status       string          `json:"status"`
+	InputContext json.RawMessage `json:"input_context"`
+	OutputData   json.RawMessage `json:"output_data"`
+	LastContext  json.RawMessage `json:"last_context"`
+	AssetIDs     []string        `json:"asset_ids"`
 }
 
 type RunNodeResponse struct {
 	RunID string `json:"run_id"`
+}
+
+type TextEditRequest struct {
+	ProjectID    string          `json:"project_id"`
+	InstanceID   string          `json:"instance_id"`
+	OriginalText string          `json:"original_text"`
+	EditIntent   string          `json:"edit_intent"`
+	Context      json.RawMessage `json:"context"`
+}
+
+type TextEditResponse struct {
+	EditedText string `json:"edited_text"`
+	Diff       string `json:"diff"`
 }

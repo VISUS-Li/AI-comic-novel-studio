@@ -37,6 +37,8 @@ import {
   ProjectIDE,
   ProjectIDEPublish,
   Library,
+  ScriptProjectsPage,
+  ScriptWorkflowPage,
   PluginLayout,
   PluginToolPage,
   PluginPage,
@@ -121,6 +123,24 @@ export const router: ReturnType<typeof createBrowserRouter> =
                   Component: Develop,
                   loader: () => ({
                     subMenuKey: SpaceSubModuleEnum.DEVELOP,
+                  }),
+                },
+                {
+                  path: 'script-projects',
+                  Component: ScriptProjectsPage,
+                  loader: () => ({
+                    subMenuKey: SpaceSubModuleEnum.DEVELOP,
+                    hasSider: true,
+                    requireAuth: true,
+                  }),
+                },
+                {
+                  path: 'script-projects/:projectId/workflows/:instanceId',
+                  Component: ScriptWorkflowPage,
+                  loader: () => ({
+                    subMenuKey: SpaceSubModuleEnum.DEVELOP,
+                    hasSider: true,
+                    requireAuth: true,
                   }),
                 },
 

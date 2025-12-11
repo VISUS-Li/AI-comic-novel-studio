@@ -15,12 +15,29 @@
  */
 
 import { useParams } from 'react-router-dom';
+import React from 'react';
 
 import { Develop } from '@coze-studio/workspace-adapter/develop';
 
+import { ScriptEntryCard } from '../components/script-entry-card';
+
+const containerStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '16px',
+};
+
 const Page = () => {
   const { space_id } = useParams();
-  return space_id ? <Develop spaceId={space_id} /> : null;
+  if (!space_id) {
+    return null;
+  }
+  return (
+    <div style={containerStyle}>
+      <ScriptEntryCard />
+      <Develop spaceId={space_id} />
+    </div>
+  );
 };
 
 export default Page;
