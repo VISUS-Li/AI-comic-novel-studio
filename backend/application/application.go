@@ -32,6 +32,7 @@ import (
 	"github.com/coze-dev/coze-studio/backend/application/openauth"
 	"github.com/coze-dev/coze-studio/backend/application/plugin"
 	"github.com/coze-dev/coze-studio/backend/application/prompt"
+	scriptapp "github.com/coze-dev/coze-studio/backend/application/script"
 	"github.com/coze-dev/coze-studio/backend/application/search"
 	"github.com/coze-dev/coze-studio/backend/application/shortcutcmd"
 	"github.com/coze-dev/coze-studio/backend/application/singleagent"
@@ -109,6 +110,7 @@ type primaryServices struct {
 	knowledgeSVC *knowledge.KnowledgeApplicationService
 	workflowSVC  *workflow.ApplicationService
 	shortcutSVC  *shortcutcmd.ShortcutCmdApplicationService
+	scriptSVC    *scriptapp.ScriptApplicationService
 	appSVC       *app.APPApplicationService
 }
 
@@ -233,6 +235,7 @@ func initPrimaryServices(ctx context.Context, basicServices *basicServices) (*pr
 	}
 
 	shortcutSVC := shortcutcmd.InitService(basicServices.infra.DB, basicServices.infra.IDGenSVC)
+	scriptSVC := scriptapp.InitService(basicServices.infra.DB, basicServices.infra.IDGenSVC)
 
 	return &primaryServices{
 		basicServices: basicServices,
@@ -241,6 +244,7 @@ func initPrimaryServices(ctx context.Context, basicServices *basicServices) (*pr
 		knowledgeSVC:  knowledgeSVC,
 		workflowSVC:   workflowDomainSVC,
 		shortcutSVC:   shortcutSVC,
+		scriptSVC:     scriptSVC,
 		infra:         basicServices.infra,
 	}, nil
 }

@@ -33,6 +33,7 @@ import (
 
 	"github.com/coze-dev/coze-studio/backend/api/middleware"
 	"github.com/coze-dev/coze-studio/backend/api/router"
+	scriptrouter "github.com/coze-dev/coze-studio/backend/api/router/script"
 	"github.com/coze-dev/coze-studio/backend/application"
 	"github.com/coze-dev/coze-studio/backend/pkg/lang/conv"
 	"github.com/coze-dev/coze-studio/backend/pkg/lang/ternary"
@@ -101,6 +102,7 @@ func startHttpServer() {
 	s.Use(middleware.I18nMW()) // must after SessionAuthMW
 
 	router.GeneratedRegister(s)
+	scriptrouter.Register(s)
 	s.Spin()
 }
 

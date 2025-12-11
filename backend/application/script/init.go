@@ -29,17 +29,21 @@ type ScriptApplicationService struct {
 	ScriptProject    *ScriptProjectService
 	WorkflowInstance *WorkflowInstanceService
 	Asset            *AssetService
+	WorkflowRun      *WorkflowRunService
 }
 
 func InitService(db *gorm.DB, idGen idgen.IDGenerator) *ScriptApplicationService {
 	projectRepo := repository.NewScriptProjectRepo(db, idGen)
 	workflowRepo := repository.NewWorkflowInstanceRepo(db, idGen)
 	assetRepo := repository.NewAssetRepo(db, idGen)
+	runRepo := repository.NewWorkflowRunRepo(db, idGen)
+	nodeOutputRepo := repository.NewNodeOutputRepo(db, idGen)
 
 	svc := &ScriptApplicationService{
 		ScriptProject:    &ScriptProjectService{repo: projectRepo},
 		WorkflowInstance: &WorkflowInstanceService{repo: workflowRepo},
 		Asset:            &AssetService{repo: assetRepo},
+		WorkflowRun:      &WorkflowRunService{runRepo: runRepo, nodeOutputRepo: nodeOutputRepo, workflowInstanceRepo: workflowRepo},
 	}
 	ScriptSVC = svc
 	return svc
