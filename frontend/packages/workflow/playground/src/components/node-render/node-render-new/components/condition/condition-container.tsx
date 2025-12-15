@@ -37,7 +37,7 @@ export const ConditionContainer: FC<ConditionContainerProps> = props => {
   return (
     <div className="coz-stroke-plus coz-bg-max border border-solid py-1 rounded-mini text-xs coz-fg-primary min-h-[32px]">
       {conditions.map((condition, index) => (
-        <>
+        <div key={index}>
           <div className="flex items-center px-1">
             <div className="flex-1 min-w-0 overflow-hidden">
               {condition.left}
@@ -53,7 +53,7 @@ export const ConditionContainer: FC<ConditionContainerProps> = props => {
           {index < conditions.length - 1 ? (
             <LogicDisplay logic={logic} />
           ) : null}
-        </>
+        </div>
       ))}
     </div>
   );

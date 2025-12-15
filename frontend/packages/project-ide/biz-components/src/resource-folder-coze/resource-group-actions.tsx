@@ -80,6 +80,7 @@ export const ResourceGroupActions: React.FC<ResourceGroupActionsProps> = ({
     createResourceConfig.map(({ icon, label, tooltip, subType }) => {
       const children = (
         <Menu.Item
+          key={subType}
           data-testid={`project-ide.resource-group.actions.menu-item.${subType}`}
           onClick={(value, event) => {
             event.stopPropagation();
@@ -95,7 +96,7 @@ export const ResourceGroupActions: React.FC<ResourceGroupActionsProps> = ({
           <Tooltip
             trigger="hover"
             position="rightTop"
-            key={subType}
+            key={`tooltip-${subType}`}
             showArrow={false}
             content={tooltip}
             style={{ width: 208, padding: 4, borderRadius: 'var(--coze-8)' }}

@@ -154,3 +154,10 @@
 2. 角色/分镜/音频等节点可以展示并持久化图片/音频/列表/文本资源引用。
 3. 管理节点执行后能把结构化输出提供给下游节点（LLM/图片生成/插件等）作为输入变量引用。
 4. 新节点出现在节点面板中，符合现有分类/模板机制（NodeTemplateList + node-registries）。
+
+---
+
+## 近期更新（Step1 落地记录）
+
+- 新增“创作管理”节点：实现 `CreativeBrief` / Project Brief 节点（NodeType ID 1001，新建 `creative` 分类），通过 adaptor 注册和 pass-through 执行，输出 `brief` 对象（title/audience/style/constraints/references）。
+- 前端注册与面板：`frontend/packages/workflow/playground/src/node-registries/creative-brief/*` 实现节点 registry/表单/内容，支持文本、数组与资源引用；已加入 V2 节点常量、可用节点列表和 node-registries 集成，保证节点可见、可编辑。

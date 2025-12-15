@@ -189,6 +189,7 @@ const (
 	NodeTypeClearConversationHistory   NodeType = "ClearConversationHistory"
 	NodeTypeConversationHistory        NodeType = "ConversationHistory"
 	NodeTypeComment                    NodeType = "Comment"
+	NodeTypeCreativeBrief              NodeType = "CreativeBrief"
 )
 
 const (
@@ -236,6 +237,11 @@ var Categories = []Category{
 		Key:      "utilities",
 		Name:     "组件",
 		EnUSName: "Utilities",
+	},
+	{
+		Key:      "creative",
+		Name:     "创作",
+		EnUSName: "Creative",
 	},
 	{
 		Key:      "conversation_management",
@@ -969,6 +975,19 @@ var NodeTypeMetas = map[NodeType]*NodeTypeMeta{
 		},
 		EnUSName:        "Knowledge delete",
 		EnUSDescription: "The delete node can delete a document in knowledge base.",
+	},
+	NodeTypeCreativeBrief: {
+		ID:              1001,
+		Key:             NodeTypeCreativeBrief,
+		DisplayKey:      "ProjectBrief",
+		Name:            "创作简述",
+		Category:        "creative",
+		Desc:            "整理项目创作背景、受众、风格与约束，集中输出给下游节点复用",
+		Color:           "#6E56CF",
+		IconURI:         "default_icon/workflow_icon/icon-text.jpg",
+		SupportBatch:    false,
+		EnUSName:        "Project Brief",
+		EnUSDescription: "Collect project goals, audience, style and references, then expose a structured brief for downstream nodes.",
 	},
 	NodeTypeLambda: {
 		ID:       1000,

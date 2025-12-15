@@ -35,6 +35,7 @@ import (
 	"github.com/coze-dev/coze-studio/backend/domain/workflow/internal/nodes/batch"
 	"github.com/coze-dev/coze-studio/backend/domain/workflow/internal/nodes/code"
 	"github.com/coze-dev/coze-studio/backend/domain/workflow/internal/nodes/conversation"
+	"github.com/coze-dev/coze-studio/backend/domain/workflow/internal/nodes/creativebrief"
 	"github.com/coze-dev/coze-studio/backend/domain/workflow/internal/nodes/database"
 	"github.com/coze-dev/coze-studio/backend/domain/workflow/internal/nodes/emitter"
 	"github.com/coze-dev/coze-studio/backend/domain/workflow/internal/nodes/entry"
@@ -635,6 +636,9 @@ func RegisterAllNodeAdaptors() {
 	})
 	nodes.RegisterNodeAdaptor(entity.NodeTypeExit, func() nodes.NodeAdaptor {
 		return &exit.Config{}
+	})
+	nodes.RegisterNodeAdaptor(entity.NodeTypeCreativeBrief, func() nodes.NodeAdaptor {
+		return &creativebrief.Config{}
 	})
 	nodes.RegisterNodeAdaptor(entity.NodeTypeVariableAggregator, func() nodes.NodeAdaptor {
 		return &variableaggregator.Config{}

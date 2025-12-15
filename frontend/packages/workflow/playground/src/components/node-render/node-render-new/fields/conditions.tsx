@@ -35,7 +35,7 @@ export function Conditions() {
         }
 
         return (
-          <Field label={label}>
+          <Field key={calcPortId(index)} label={label}>
             <ConditionBranch branch={condition.condition} />
             <Port id={calcPortId(index)} type="output" />
           </Field>
